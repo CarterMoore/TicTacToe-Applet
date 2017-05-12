@@ -2,6 +2,7 @@ import java.applet.Applet;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -85,7 +86,36 @@ public class TicTacToe extends Applet implements MouseListener{
         return win; // Return who won, -1 = O, 0 = nobody, 1 = X
     }
     
-    private void botMove(int difficulty) {}
+    private void botMove(int difficulty) {
+    
+        Random random = new Random();
+        
+        ArrayList<Integer> availableX = new ArrayList<>();
+        ArrayList<Integer> availableY = new ArrayList<>();
+        
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (board[i][j] == 0) {
+                    availableX.add(i);
+                    availableY.add(j);
+                }
+                    
+            }
+        }
+        
+        if (difficulty == 1) { // Easiest difficulty, random
+            
+            int x = random.nextInt(availableX.size());
+            int y = random.nextInt(availableY.size());
+    
+            System.out.println(availableX.get(x));
+            System.out.println(availableY.get(y));
+            
+            board[availableX.get(x)][availableY.get(y)] = -1;
+            
+        }
+        
+    }
     
     public void mouseClicked (MouseEvent e) {
         int x = e.getX();
@@ -102,7 +132,8 @@ public class TicTacToe extends Applet implements MouseListener{
                 }
             }
         }
-        botMove(1);
+        if (getWinner() == 0)
+            botMove(1);
         repaint();
     }
     
