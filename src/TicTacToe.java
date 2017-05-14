@@ -2,138 +2,158 @@ import java.applet.Applet;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
 import java.util.Random;
 
 /**
- * TicTacToe-Applet
+ * TicTacToe
  * Created by Carter Moore
+ * ICS3U final project
  */
 
 public class TicTacToe extends Applet implements MouseListener{
     
     private int size = 3; // Dimensions of the board will be able to change
     private int board[][] = new int[size][size]; // Store an int on what is in the square, -1 = O, 0 = blank, 1 = X
-    private final int LENGTH = 600;
+    private final int LENGTH = 600; // Size of the window
+    private boolean isPvp = false; // Whether or not game is player vs player
+    private int player = 1; // Which player has their move (X starts)
+    private int difficulty = 2;
     
     public void init() {
         addMouseListener(this);
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board.length; j++) {
-                board[i][j] = 0;
+                board[i][j] = 0; // Set all board spaces as 0
             }
         }
     }
     
     public void paint(Graphics g) {
-        for (int i = 1; i < size; i++) { // Draw lines depending on given size
-            g.fillRect(i * (LENGTH / size) - 2, 0, 4, LENGTH);
-            g.fillRect(0, i * (LENGTH / size) - 2, LENGTH, 4);
+                for (int i = 1; i < size; i++) { // Draw lines depending on given size
+                g.fillRect(i * (LENGTH / size) - 2, 0, 4, LENGTH);
+                g.fillRect(0, i * (LENGTH / size) - 2, LENGTH, 4);
         }
         
         Image xImage = getImage(getClass().getResource("X.png"));
         Image oImage = getImage(getClass().getResource("O.png"));
         
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
+        // Loop though and draw X or O depending on state of board space
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
                 if (board[i][j] == 1)
-                    g.drawImage(xImage, i * (LENGTH / size), j * (LENGTH / size), this);
+                            g.drawImage(xImage, i * (LENGTH / size), j * (LENGTH / size), this);
                 else if (board[i][j] == -1)
-                    g.drawImage(oImage, i * (LENGTH / size), j * (LENGTH / size), this);
+                            g.drawImage(oImage, i * (LENGTH / size), j * (LENGTH / size), this);
             }
         }
     }
     
     private int getWinner() {
-        int win = 0;
+        int winner = 0;
         
         boolean diagonalW1 = true, diagonalW2 = true;
-        for (int i = 0; i < size; i++) {
+            for (int i = 0; i < size; i++) {
             boolean horizontalW = true, verticalW = true;
-            for (int j = 1; j < size; j++) {
-                if (board[i][0] != board[i][j]) { // Check if win horizontal win
+                for (int j = 1; j < size; j++) {
+                if (board[i][0] != board[i][j])  // Check if win horizontal win
                     horizontalW = false;
-                    break;
-                }
                 
-                if (board[0][i] != board[j][i]) { // Check if vertical win
+                if (board[0][i] != board[j][i])  // Check if vertical win
                     verticalW = false;
-                    break;
-                }
             }
             
-            if (horizontalW && board[i][0] != 0) { // Make sure a player won
-                win = board[i][0];
-                break;
-            }
+            if (horizontalW && board[i][0] != 0) // Make sure a player won
+                winner = board[i][0];
             
-            if (verticalW && board[0][i] != 0) { // Make sure a player won
-                win = board[0][i];
-                break;
-            }
+            if (verticalW && board[0][i] != 0)  // Make sure a player won
+                winner = board[0][i];
             
             if (board[0][0] != board[i][i]) // Check for diagonal win
                 diagonalW1 = false;
-            if (board[0][size-1] != board[i][size-i-1]) // Check for diagonal win
+                    if (board[0][size-1] != board[i][size-i-1]) // Check for diagonal win
                 diagonalW2 = false;
         }
         
         if (diagonalW1 && board[0][0] != 0) // Make sure a player won
-            win = board[0][0];
-        if (diagonalW2 && board[0][size-1] != 0) // Make sure a player won
-            win = board[0][size-1];
-        
-        return win; // Return who won, -1 = O, 0 = nobody, 1 = X
+            winner = board[0][0];
+            if (diagonalW2 && board[0][size-1] != 0) // Make sure a player won
+                winner = board[0][size-1];
+            
+        System.out.println(winner);
+        return winner; // Return who won, -1 = O, 0 = nobody, 1 = X
     }
     
     private void botMove(int difficulty) {
     
         Random random = new Random();
-        
-        ArrayList<Integer> availableX = new ArrayList<>();
-        ArrayList<Integer> availableY = new ArrayList<>();
-        
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                if (board[i][j] == 0) {
-                    availableX.add(i);
-                    availableY.add(j);
-                }
-                    
-            }
-        }
-        
+
         if (difficulty == 1) { // Easiest difficulty, random
             
-            int x = random.nextInt(availableX.size());
-            int y = random.nextInt(availableY.size());
-    
-            System.out.println(availableX.get(x));
-            System.out.println(availableY.get(y));
+                int x = random.nextInt(size);
+                int y = random.nextInt(size);
             
-            board[availableX.get(x)][availableY.get(y)] = -1;
+            // Randomize until available space is found
+            while (board[x][y] != 0) {
+                    x = random.nextInt(size);
+                    y = random.nextInt(size);
+            }
+            
+            board[x][y] = -1;
+            
+        }
+        
+        else if (difficulty == 2) { // Medium difficulty
+    
+                for (int i = 0; i < size; i++) {
+                    for (int j = 0; j < size; j++) {
+                    if (board[i][j] == 0) {
+                        int temp = board[i][j];
+                        board[i][j] = -1; // Simulate if moving in that spot will result in a win
+                        if (getWinner() == -1) // If so, move there
+                            return;
+                        else
+                            board[i][j] = temp;
+                    }
+                }
+            }
+    
+                for (int i = 0; i < size; i++) {
+                    for (int j = 0; j < size; j++) {
+                    if (board[i][j] == 0) {
+                        int temp = board[i][j];
+                        board[i][j] = 1; // Simulate if player moving in that spot will result in a loss
+                        if (getWinner() == 1) { // If so, move there
+                            board[i][j] = -1;
+                            return;
+                        }else
+                            board[i][j] = temp;
+                    }
+                }
+            }
+            
+            botMove(1);
             
         }
         
     }
     
     public void mouseClicked (MouseEvent e) {
+        
+        // Get x and y coordinates of click
         int x = e.getX();
         int y = e.getY();
-    
-        System.out.println(x + " " + y);
-    
-        loop:
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                if (x <= (i + 1) * (LENGTH / size) && y <= (j + 1) * (LENGTH / size) && board[i][j] == 0) {
-                    board[i][j] = 1;
-                    break loop;
-                }
-            }
+        
+        int moveX = x / (LENGTH / size);
+        int moveY = y / (LENGTH / size);
+        
+        if (board[moveX][moveY] == 0 && getWinner() == 0 && isPvp) {
+            board[moveX][moveY] = player;
+            player *= -1;
+        }else if (board[moveX][moveY] == 0 && getWinner() == 0) {
+            board[moveX][moveY] = 1;
+            botMove(difficulty);
         }
-        if (getWinner() == 0)
-            botMove(1);
+        
         repaint();
     }
     
