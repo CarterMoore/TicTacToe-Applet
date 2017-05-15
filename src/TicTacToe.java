@@ -17,11 +17,15 @@ public class TicTacToe extends Applet implements MouseListener{
     private int size = 3; // Board will be size x size
     private int board[][] = new int[size][size]; // Store an int on what is in the square, -1 = O, 0 = blank, 1 = X
     private final int LENGTH = 600; // Size of the window (600 x 600)
-    private boolean isPvp = false; // Whether or not game is player vs player
+    private boolean isPvp; // Whether or not game is player vs player
     private int player = 1; // Which player has their move (X starts)
-    private int difficulty = 2; // Difficulty of bot. 1 = Easy, 2 = Medium, 3 = Impossible
+    private int difficulty = 1; // Difficulty of bot. 1 = Easy, 2 = Medium, 3 = Impossible
+    private boolean gameStarted = false;
+    private final int FONTSIZE = 30;
+    Font font = new Font("Arial", Font.BOLD, FONTSIZE);
     
     public void init() {
+        setSize(LENGTH, LENGTH);
         addMouseListener(this); // Create mouse listener
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board.length; j++) {
@@ -31,26 +35,44 @@ public class TicTacToe extends Applet implements MouseListener{
     }
     
     public void paint(Graphics g) {
-        
-        for (int i = 1; i < size; i++) { // Draw lines depending on given size
-            g.fillRect(i * (LENGTH / size) - 2, 0, 4, LENGTH);
-            g.fillRect(0, i * (LENGTH / size) - 2, LENGTH, 4);
-        }
-        
-        Image xImage = getImage(getClass().getResource("X.png")); // Get X image
-        Image oImage = getImage(getClass().getResource("O.png")); // Get O image
-        
-        // Loop though and draw X or O depending on state of board
+
+        if (gameStarted) {
+
+            for (int i = 1; i < size; i++) { // Draw lines depending on given size
+                g.fillRect(i * (LENGTH / size) - 2, 0, 4, LENGTH);
+                g.fillRect(0, i * (LENGTH / size) - 2, LENGTH, 4);
+            }
+
+            Image xImage = getImage(getClass().getResource("X.png")); // Get X image
+            Image oImage = getImage(getClass().getResource("O.png")); // Get O image
+
+            // Loop though and draw X or O depending on state of board
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
-                if (board[i][j] == 1)
-                            g.drawImage(xImage, i * (LENGTH / size), j * (LENGTH / size), this);
-                else if (board[i][j] == -1)
-                            g.drawImage(oImage, i * (LENGTH / size), j * (LENGTH / size), this);
+                    if (board[i][j] == 1)
+                        g.drawImage(xImage, i * (LENGTH / size), j * (LENGTH / size), this);
+                    else if (board[i][j] == -1)
+                        g.drawImage(oImage, i * (LENGTH / size), j * (LENGTH / size), this);
+                }
             }
+
+        }else {
+
+            String title = "Tic Tac Toe - Carter Moore";
+            g.setFont(font);
+
+            g.drawString(title, 70, 30);
+
+            g.drawRect(60, 150, 480, 100);
+            g.drawString("Single Player", 200, 200);
+
+            g.drawRect(60, 300, 480, 100);
+            g.drawString("Two Player", 225, 350);
+
         }
+
     }
-    
+
     private int getWinner() {
         
         int winner = 0;
@@ -160,25 +182,35 @@ public class TicTacToe extends Applet implements MouseListener{
         // Get x and y coordinates of click
         int x = e.getX();
         int y = e.getY();
-        
-        // Calculate which squares are clicked from the coordinates
-        // e.g. x = 100, size = 3, 100 / (600 / 3) = 0
-        int moveX = x / (LENGTH / size);
-        int moveY = y / (LENGTH / size);
-        
-        // If the game is two player, swap between X and O every turn
-        if (board[moveX][moveY] == 0 && getWinner() == 0 && isPvp) {
-            board[moveX][moveY] = player;
-            player *= -1;
+
+        if (gameStarted) {
+
+            // Calculate which squares are clicked from the coordinates
+            // e.g. x = 100, size = 3, 100 / (600 / 3) = 0
+            int moveX = x / (LENGTH / size);
+            int moveY = y / (LENGTH / size);
+
+            // If the game is two player, swap between X and O every turn
+            if (board[moveX][moveY] == 0 && getWinner() == 0 && isPvp) {
+                board[moveX][moveY] = player;
+                player *= -1;
+            }
+            // If the game is single player call the botMove procedure after every turn
+            else if (board[moveX][moveY] == 0 && getWinner() == 0) {
+                board[moveX][moveY] = 1;
+                botMove(difficulty);
+            }
+
+            // Draw the updated board
+            repaint();
+        }else {
+            if (x >= 60 && x <= 540 && y >= 150 && y <= 250) {
+                isPvp = false;
+            }else if (x >= 60 && x <= 540 && y >= 300 && y <= 400) {
+                isPvp = true;
+                repaint();
+            }
         }
-        // If the game is single player call the botMove procedure after every turn
-        else if (board[moveX][moveY] == 0 && getWinner() == 0) {
-            board[moveX][moveY] = 1;
-            botMove(difficulty);
-        }
-        
-        // Draw the updated board
-        repaint();
     }
     
     //<editor-fold desc="Unused mouse functions">
