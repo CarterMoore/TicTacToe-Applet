@@ -12,10 +12,10 @@ import java.util.Random;
 
 public class TicTacToe extends Applet implements MouseListener{
     
-    private int size = 3; // Dimensions of the board will be able to change
+    private int size = 3; // Board will be size x size
     private int board[][] = new int[size][size]; // Store an int on what is in the square, -1 = O, 0 = blank, 1 = X
     private final int LENGTH = 600; // Size of the window (600 x 600)
-    private boolean isPvp = true; // Whether or not game is player vs player
+    private boolean isPvp = false; // Whether or not game is player vs player
     private int player = 1; // Which player has their move (X starts)
     private int difficulty = 2; // Difficulty of bot. 1 = Easy, 2 = Medium, 3 = Impossible
     
@@ -53,7 +53,7 @@ public class TicTacToe extends Applet implements MouseListener{
         
         int winner = 0;
         
-        // Set all win possibilities as true
+        // Set all win possibilities as true and set to false if no win
         boolean diagonalW1 = true, diagonalW2 = true;
             for (int i = 0; i < size; i++) {
             boolean horizontalW = true, verticalW = true;
@@ -91,14 +91,14 @@ public class TicTacToe extends Applet implements MouseListener{
 
         if (difficulty == 1) { // Easiest difficulty, random
             
-                int x = random.nextInt(size);
-                int y = random.nextInt(size);
+            int x = random.nextInt(size);
+            int y = random.nextInt(size);
             
             // Randomize until available space is found
             // Make sure a move can be made. Will be caught in infinite loop if not checked
             while (availableSpot() && board[x][y] != 0) {
-                    x = random.nextInt(size);
-                    y = random.nextInt(size);
+                x = random.nextInt(size);
+                y = random.nextInt(size);
             }
             
             board[x][y] = -1;
@@ -107,33 +107,33 @@ public class TicTacToe extends Applet implements MouseListener{
         
         else if (difficulty == 2) { // Medium difficulty
     
-                for (int i = 0; i < size; i++) {
-                    for (int j = 0; j < size; j++) {
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
                     if (board[i][j] == 0) {
-                        int temp = board[i][j];
+                        int temp = board[i][j]; // Create a temporary variable to store state of space
                         board[i][j] = -1; // Simulate if moving in that spot will result in a win
                         if (getWinner() == -1) // If so, move there
                             return;
                         else
-                            board[i][j] = temp;
+                            board[i][j] = temp; // Put space back to original value
                     }
                 }
             }
     
-                for (int i = 0; i < size; i++) {
-                    for (int j = 0; j < size; j++) {
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
                     if (board[i][j] == 0) {
-                        int temp = board[i][j];
+                        int temp = board[i][j]; // Create a temporary variable to store state of space
                         board[i][j] = 1; // Simulate if player moving in that spot will result in a loss
                         if (getWinner() == 1) { // If so, move there
                             board[i][j] = -1;
                             return;
                         }else
-                            board[i][j] = temp;
+                            board[i][j] = temp; // Put space back to original value
                     }
                 }
             }
-            
+            // If bot cannot win or block a win from a move, choose random spot
             botMove(1);
             
         }else { // Impossible difficulty, uses minimax algorithm
@@ -160,7 +160,7 @@ public class TicTacToe extends Applet implements MouseListener{
         int y = e.getY();
         
         // Calculate which squares are clicked from the coordinates
-        // e.g. x = 100, 100 / (600 / 3) = 0
+        // e.g. x = 100, size = 3, 100 / (600 / 3) = 0
         int moveX = x / (LENGTH / size);
         int moveY = y / (LENGTH / size);
         
