@@ -10,6 +10,8 @@ import java.util.Random;
  * ICS3U final project
  */
 
+// TODO Create Minimax Algorithm, Create menu screen where players can choose to play each other or a bot, and difficulty can be chosen
+
 public class TicTacToe extends Applet implements MouseListener{
     
     private int size = 3; // Board will be size x size
