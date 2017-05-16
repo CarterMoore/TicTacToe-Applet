@@ -17,13 +17,12 @@ public class TicTacToe extends Applet implements MouseListener{
     private int size = 3; // Board will be size x size
     private int board[][] = new int[size][size]; // Store an int on what is in the square, -1 = O, 0 = blank, 1 = X
     private final int LENGTH = 600; // Size of the window (600 x 600)
-    private boolean isPvp; // Whether or not game is player vs player
+    private boolean isPvp = true; // Whether or not game is player vs player
     private int player = 1; // Which player has their move (X starts)
-    private int difficulty = 1; // Difficulty of bot. 1 = Easy, 2 = Medium, 3 = Impossible
-    private boolean gameStarted = false;
-    private final int FONTSIZE = 30;
-    Font font = new Font("Arial", Font.BOLD, FONTSIZE);
-    
+    private int difficulty = 2; // Difficulty of bot. 1 = Easy, 2 = Medium, 3 = Impossible
+    private int gameState = 0; // 0 is title screen, 1 is difficulty selection, 2 is playing, 3 is winner screen
+
+
     public void init() {
         setSize(LENGTH, LENGTH);
         addMouseListener(this); // Create mouse listener
@@ -36,7 +35,9 @@ public class TicTacToe extends Applet implements MouseListener{
     
     public void paint(Graphics g) {
 
-        if (gameStarted) {
+        Font font = new Font("Arial", Font.BOLD, 30);
+
+        if (gameState == 2) {
 
             for (int i = 1; i < size; i++) { // Draw lines depending on given size
                 g.fillRect(i * (LENGTH / size) - 2, 0, 4, LENGTH);
@@ -56,18 +57,32 @@ public class TicTacToe extends Applet implements MouseListener{
                 }
             }
 
-        }else {
+        }else if (gameState == 0) {
 
-            String title = "Tic Tac Toe - Carter Moore";
             g.setFont(font);
 
-            g.drawString(title, 70, 30);
+            g.drawString("Tic Tac Toe - Carter Moore", 70, 30);
 
             g.drawRect(60, 150, 480, 100);
             g.drawString("Single Player", 200, 200);
 
             g.drawRect(60, 300, 480, 100);
             g.drawString("Two Player", 225, 350);
+
+        }else if (gameState == 1) {
+
+            g.setFont(font);
+
+            g.drawString("Select Difficulty", 180, 30);
+
+            g.drawRect(60, 150, 480, 100);
+            g.drawString("Easy", 275, 200);
+
+            g.drawRect(60, 250, 480, 100);
+            g.drawString("Medium", 250, 300);
+
+            g.drawRect(60, 350, 480, 100);
+            g.drawString("Impossible", 240, 400);
 
         }
 
@@ -105,7 +120,8 @@ public class TicTacToe extends Applet implements MouseListener{
             winner = board[0][0];
         if (diagonalW2 && board[0][size-1] != 0) // Make sure a player won
             winner = board[0][size-1];
-            
+
+        System.out.println(winner);
         return winner; // Return who won, -1 = O, 0 = nobody, 1 = X
     }
     
@@ -124,9 +140,8 @@ public class TicTacToe extends Applet implements MouseListener{
                 x = random.nextInt(size);
                 y = random.nextInt(size);
             }
-            
-            board[x][y] = -1;
-            
+            if (getWinner() == 0)
+                board[x][y] = -1;
         }
         
         else if (difficulty == 2) { // Medium difficulty
@@ -183,10 +198,10 @@ public class TicTacToe extends Applet implements MouseListener{
         int x = e.getX();
         int y = e.getY();
 
-        if (gameStarted) {
+        if (gameState == 2) {
 
             // Calculate which squares are clicked from the coordinates
-            // e.g. x = 100, size = 3, 100 / (600 / 3) = 0
+            // e.g. x = 100, size = 3, (int) (100 / (600 / 3)) = 0
             int moveX = x / (LENGTH / size);
             int moveY = y / (LENGTH / size);
 
@@ -198,16 +213,21 @@ public class TicTacToe extends Applet implements MouseListener{
             // If the game is single player call the botMove procedure after every turn
             else if (board[moveX][moveY] == 0 && getWinner() == 0) {
                 board[moveX][moveY] = 1;
-                botMove(difficulty);
+                if (getWinner() == 0) {
+                    botMove(difficulty);
+                }
             }
 
             // Draw the updated board
             repaint();
-        }else {
+        }else if (gameState == 0){
             if (x >= 60 && x <= 540 && y >= 150 && y <= 250) {
                 isPvp = false;
+                gameState = 1;
+                repaint();
             }else if (x >= 60 && x <= 540 && y >= 300 && y <= 400) {
                 isPvp = true;
+                gameState = 2;
                 repaint();
             }
         }
