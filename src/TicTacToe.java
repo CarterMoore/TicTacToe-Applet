@@ -98,10 +98,26 @@ public class TicTacToe extends Applet implements MouseListener {
             }
             
         }else if (gameState == 4) {
-            
+            g.setColor(Color.WHITE);
+            g.drawRect(0, 0, LENGTH, LENGTH);
+            g.setColor(Color.BLUE);
+            g.setFont(font);
+            if (getWinner() == 0)  { // Tie
+                g.drawString("Tie!", 300, 300);
+            }else if (isPvp && getWinner() == 1) {
+                g.drawString("Player 1 wins!", 300, 300);
+            }else if (isPvp && getWinner() == -1) {
+                g.drawString("Player2 wins!", 300 ,300);
+            }else if (getWinner() == 1) {
+                g.drawString("You win!", 300, 300);
+            }else if (getWinner() == -1) {
+                g.drawString("You Lose!", 300, 300);
+            }
         }
 
     }
+
+    private void drawMenu(){}
 
     private int getWinner() {
         
@@ -155,8 +171,7 @@ public class TicTacToe extends Applet implements MouseListener {
                 x = random.nextInt(size);
                 y = random.nextInt(size);
             }
-            if (getWinner() == 0)
-                board[x][y] = -1;
+            board[x][y] = -1;
         }
         
         else if (difficulty == 2) { // Medium difficulty
@@ -286,7 +301,10 @@ public class TicTacToe extends Applet implements MouseListener {
                     botMove(difficulty);
                 }
             }
-    
+
+            if (getWinner() != 0 || !availableSpot())
+                gameState = 4;
+
             // Draw the updated board
             repaint();
         }
