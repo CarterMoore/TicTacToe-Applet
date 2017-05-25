@@ -16,18 +16,21 @@ public class TicTacToe extends Applet implements MouseListener {
 
     private int size; // Board will be size x size
     private int board[][]; // Store an int on what is in the square, -1 = O, 0 = blank, 1 = X
+    private int weight[][];
     private final int LENGTH = 600; // Size of the window (600 x 600)
     private boolean isPvp; // Whether or not game is player vs player
-    private int player = 1;
+    private int player;
 
+    // Different difficulties
     private enum Difficulty {
         EASY,
-        MEDIUM,
+        HARD,
         IMPOSSIBLE
     }
 
-    private Difficulty difficulty;
+    private Difficulty difficulty; // Create variable for difficulty
 
+    // Different states of the game
     private enum GameState {
         MENU,
         SIZE_SELECT,
@@ -36,15 +39,21 @@ public class TicTacToe extends Applet implements MouseListener {
         WINNER_SCREEN
     }
 
+    // Start at the menu
     private GameState state = GameState.MENU;
 
     public void init() {
+        Random random = new Random();
+
+        player = random.nextInt(2) == 0 ? 1 : -1;
+
         setSize(LENGTH, LENGTH);
-        setBackground(Color.WHITE);
+        setBackground(Color.WHITE); // Make the background white
         addMouseListener(this); // Create mouse listener
     }
     
     public void paint(Graphics g) {
+        // Create fonts
         Font font = new Font("Arial", Font.BOLD, 30);
         Font font2 = new Font("Arial", Font.BOLD, 70);
 
@@ -69,7 +78,7 @@ public class TicTacToe extends Applet implements MouseListener {
                 drawCenteredString(g, font, "Easy", 200);
 
                 g.drawRect(60, 250, 480, 100);
-                drawCenteredString(g, font, "Medium", 300);
+                drawCenteredString(g, font, "Hard", 300);
 
                 g.drawRect(60, 350, 480, 100);
                 drawCenteredString(g, font, "Impossible", 400);
@@ -91,7 +100,7 @@ public class TicTacToe extends Applet implements MouseListener {
                 drawCenteredString(g, font, "5x5", 320);
 
                 g.drawRect(200, 370, 200, 100);
-                drawCenteredString(g, font, "5x5", 420);
+                drawCenteredString(g, font, "6x6", 420);
 
                 break;
 
@@ -133,21 +142,28 @@ public class TicTacToe extends Applet implements MouseListener {
 
                 int winner = getWinner(); // Create winner var so method only needs to be called once
 
+                // Set the screen to white
                 g.setColor(Color.WHITE);
                 g.drawRect(0, 0, LENGTH, LENGTH);
+                // Make text blue
                 g.setColor(Color.BLUE);
                 g.setFont(font2);
                 if (winner == 0)  { // Tie
                     drawCenteredString(g, font2, "Tie!", 200);
-                }else if (isPvp && winner == 1) {
+                }else if (isPvp && winner == 1) { // Player 1 wns in pvp
                     drawCenteredString(g, font2, "Player 1 wins!", 200);
-                }else if (isPvp && winner == -1) {
+                }else if (isPvp && winner == -1) { // Player 2 wins in pvp
                     drawCenteredString(g, font2, "Player 2 wins", 200);
-                }else if (winner == 1) {
+                }else if (winner == 1) { // Player wins
                     drawCenteredString(g, font2, "You win!", 200);
-                }else if (winner == -1) {
+                }else if (winner == -1) { // AI wins
                     drawCenteredString(g, font2, "You Lose!", 200);
                 }
+
+                // Draw play again button
+                g.setColor(Color.BLACK);
+                g.drawRect(60, 400, 480, 100);
+                drawCenteredString(g, font, "Play again", 450);
 
                 break;
         }
@@ -156,7 +172,7 @@ public class TicTacToe extends Applet implements MouseListener {
     }
 
     private void drawCenteredString(Graphics g, Font font, String s, int y) {
-
+        // Draw a string that is horizontally centered
         FontMetrics metrics = g.getFontMetrics(font);
 
         int x = (LENGTH - metrics.stringWidth(s)) / 2;
@@ -167,6 +183,7 @@ public class TicTacToe extends Applet implements MouseListener {
     }
 
     private int getWinner() {
+        // Determine who has won
         int winner = 0;
 
         // Set all win possibilities as true and set to false if no win
@@ -207,7 +224,7 @@ public class TicTacToe extends Applet implements MouseListener {
 
         switch (difficulty) {
             case EASY:
-                // Radomize where bot goes
+                // Randomize where bot goes
                 int x = random.nextInt(size);
                 int y = random.nextInt(size);
 
@@ -220,7 +237,7 @@ public class TicTacToe extends Applet implements MouseListener {
                 board[x][y] = -1;
                 break;
 
-            case MEDIUM:
+            case HARD:
                 for (int i = 0; i < size; i++) {
                     for (int j = 0; j < size; j++) {
                         if (board[i][j] == 0) {
@@ -247,18 +264,58 @@ public class TicTacToe extends Applet implements MouseListener {
                         }
                     }
                 }
-                // If bot cannot win or block a win from a move, choose random spot
-                botMove(Difficulty.EASY);
+
+                int moveX = 0;
+                int moveY = 0;
+                int w = 0;
+
+                for (int i = 0; i < size; i++) {
+                    for (int j = 0; j < size; j++) {
+                        if (weight[i][j] > w && board[i][j] == 0) {
+                            w = weight[i][j];
+                            moveX = i;
+                            moveY = j;
+                        }
+                    }
+                }
+                if (board[moveX][moveY] == 0)
+                    board[moveX][moveY] = -1;
                 break;
 
         }
     }
-    
-    private void initBoard(int s) {
+
+    private void initPriority() {
+
+        // Corners
+        weight[0][0] = 2;
+        weight[0][size - 1] = 2;
+        weight[size - 1][0] = 2;
+        weight[size - 1][size - 1] = 2;
+
+        // Edges
+        for(int i = 1; i < size-1; i++) {
+            weight[i][0] = 1;
+            weight[0][i] = 1;
+            weight[size - 1][i] = 1;
+            weight[i][size - 1] = 1;
+        }
+
+        // Center
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (weight[i][j] == 0)
+                    weight[i][j] = 3;
+            }
+        }
+    }
+
+    private void initBoard() {
         // Create the board with size given by user
-        size = s;
-        board = new int[s][s];
-    
+        board = new int[size][size];
+        weight = new int[size][size];
+        initPriority();
+
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board.length; j++) {
                 board[i][j] = 0;
@@ -306,7 +363,7 @@ public class TicTacToe extends Applet implements MouseListener {
                     state = GameState.SIZE_SELECT;
                     repaint();
                 }else if (x >= 60 && x <= 540 && y >= 250 && y <= 350) {
-                    difficulty = Difficulty.MEDIUM;
+                    difficulty = Difficulty.HARD;
                     state = GameState.SIZE_SELECT;
                     repaint();
                 }
@@ -325,7 +382,7 @@ public class TicTacToe extends Applet implements MouseListener {
                     size = 6;
                 }
 
-                initBoard(size);
+                initBoard();
                 state = GameState.PLAYING;
                 repaint();
                 break;
@@ -354,10 +411,15 @@ public class TicTacToe extends Applet implements MouseListener {
                 repaint();
 
                 break;
+
+            case WINNER_SCREEN:
+                if (x >= 60 && x <= 540 && y >= 400 && y <= 500) {
+                    state = GameState.MENU;
+                    repaint();
+                }
         }
     }
     
-    //<editor-fold desc="Unused mouse functions">
     public void mousePressed (MouseEvent e) {
         
     }
@@ -373,5 +435,4 @@ public class TicTacToe extends Applet implements MouseListener {
     public void mouseExited (MouseEvent e) {
         
     }
-    //</editor-fold>
 }
